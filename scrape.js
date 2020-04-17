@@ -7,8 +7,17 @@ const moment = require("moment");
 // Runs scrape every 6 hours
 setInterval(runScrape, 21600000);
 
+console.log(
+  "Starting scrape: " +
+    moment().format("MMMM Do YYYY, h:mm:ss a") +
+    ".  Next scrape in 6 hours."
+);
 function runScrape() {
-  console.log("Ran Scrape at: " + moment().format("MMMM Do YYYY, h:mm:ss"));
+  console.log(
+    "Ran Scrape at: " +
+      moment().format("MMMM Do YYYY, h:mm:ss a") +
+      ".  Next scrape in 6 hours."
+  );
 
   axios.get("https://www.telus.com/en/digital/careers/").then((res) => {
     const sendMail = (jobData) => {
