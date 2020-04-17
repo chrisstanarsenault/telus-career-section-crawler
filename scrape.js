@@ -4,7 +4,8 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 const moment = require("moment");
 
-setInterval(runScrape, 20000);
+// Runs scrape every 6 hours
+setInterval(runScrape, 21600000);
 
 function runScrape() {
   console.log("Ran Scrape at: " + moment().format("MMMM Do YYYY, h:mm:ss"));
@@ -42,8 +43,11 @@ function runScrape() {
 
     $("tr").each((index, element) => {
       if (
+        // Job Title
         $(element).next().children().first().text().indexOf("Junior") != -1 &&
+        // Job Location
         $(element).next().children().next().first().text() === "Toronto, ON" &&
+        // Job Department
         $(element).next().children().next().next().first().text() ===
           "Development"
       ) {
@@ -67,6 +71,7 @@ function runScrape() {
       }
     });
 
+    // new table row for each job found
     let jobs = tableData.map(
       (job) => `
       <tr>
@@ -77,6 +82,7 @@ function runScrape() {
     `
     );
 
+    // table to be sent in email
     let jobTable = `
       <table style='border: 1px solid black'>
         <tbody>
@@ -89,6 +95,7 @@ function runScrape() {
         </tbody>
       </table>`;
 
+    // send email only if there is new junior positions found
     if (tableData.length > 0) {
       sendMail(jobTable);
     }
