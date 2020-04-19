@@ -12,10 +12,10 @@ let fileLocation =
   "Users/chrisarsenault/Desktop/Dev/WebDev/Projects/webscrape/telus-job-scrape/timestamp.file";
 const contents = fs.readFileSync(fileLocation, "utf-8");
 
-// checks timestamp file, and checks if it has been 6hours since
+// checks timestamp file, and checks if it has been 4hours since
 // last scrape, and if so, runs scrape and writes the new time inside the file
 // to check against for next round.
-if (!contents || Date.now() - contents > 5000) {
+if (!contents || Date.now() - contents > 14400000) {
   fs.writeFileSync(fileLocation, Date.now().toString());
   checkTimestampAndScrape();
 }
@@ -29,7 +29,7 @@ function checkTimestampAndScrape() {
   console.log(
     "Ran Scrape at: " +
       moment().format("MMMM Do YYYY, h:mm:ss a") +
-      ".  Next scrape in 6 hours."
+      ".  Next scrape in 4 hours."
   );
 
   axios.get("https://www.telus.com/en/digital/careers/").then((res) => {
