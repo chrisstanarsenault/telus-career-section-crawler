@@ -3,16 +3,29 @@ const nodemailer = require("nodemailer");
 const cheerio = require("cheerio");
 const axios = require("axios");
 const moment = require("moment");
+const fs = require("fs");
 
-// Runs scrape every 6 hours
-setInterval(runScrape, 21600000);
+//this var is for testing outside of LaunchDaemon
+let tfileLocation = "./timestamp.file";
+// this var is for running with LaunchDaemon
+let fileLocation =
+  "Users/chrisarsenault/Desktop/Dev/WebDev/Projects/webscrape/telus-job-scrape/timestamp.file";
+const contents = fs.readFileSync(fileLocation, "utf-8");
 
-console.log(
-  "Starting scrape: " +
-    moment().format("MMMM Do YYYY, h:mm:ss a") +
-    ".  Next scrape in 6 hours."
-);
-function runScrape() {
+// checks timestamp file, and checks if it has been 6hours since
+// last scrape, and if so, runs scrape and writes the new time inside the file
+// to check against for next round.
+if (!contents || Date.now() - contents > 5000) {
+  fs.writeFileSync(fileLocation, Date.now().toString());
+  checkTimestampAndScrape();
+}
+
+// keep this log here so you can see in the daemon log output
+// that is checking every 3 mins per the .plist file and that
+// you are not going crazy
+console.log("Checked at: " + moment().format("MMMM Do YYYY, h:mm:ss a"));
+
+function checkTimestampAndScrape() {
   console.log(
     "Ran Scrape at: " +
       moment().format("MMMM Do YYYY, h:mm:ss a") +
@@ -24,13 +37,17 @@ function runScrape() {
       let transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: "chrisstanarsenault@gmail.com",
-          pass: process.env.MY_EMAIL_PASSWORD,
+          type: "OAuth2",
+          user: process.env.PROJECT_EMAIL_ADDRESS,
+          clientId: process.env.PROJECT_AUTH_CLIENT_ID,
+          clientSecret: process.env.PROJECT_AUTH_SECRET_ID,
+          refreshToken: process.env.PROJECT_AUTH_REFRESH,
+          accessToken: process.env.PROJECT_AUTH_ACCESS_TOKEN,
         },
       });
 
       let mailOptions = {
-        from: "Telus Board Scraper",
+        from: "chrisstanarsenault@gmail.com",
         to: "chrisstanarsenault@gmail.com",
         subject: "Telus Job Board Update!",
         text: "This just in from the Telus Career board!",
